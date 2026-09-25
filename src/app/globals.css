@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #0a0806;
+  --foreground: #f3ece4;
+}
+
+body {
+  background: #0a0806;
+  color: #f3ece4;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+/* Custom radial gradient utility for vintage bioscope vignetting */
+.bg-radial-gradient {
+  background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #14100c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5c4228;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #87623a;
+}
