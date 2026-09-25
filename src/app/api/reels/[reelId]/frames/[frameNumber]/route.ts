@@ -4,11 +4,7 @@ import fs from 'fs';
 import { getReelById } from '@/lib/reels';
 import { getSessionWallet } from '@/lib/auth';
 import { hasPurchased, recordPurchase } from '@/lib/db';
-
-const PAYMENT_RECEIVER =
-  process.env.X402_PAYMENT_RECEIVER_ADDRESS ||
-  process.env.NEXT_PUBLIC_X402_RECEIVER ||
-  '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+import { createX402PaymentRequiredResponse } from '@/lib/x402';
 
 export async function GET(
   req: NextRequest,
@@ -36,7 +32,7 @@ export async function GET(
     return NextResponse.json({ error: 'Frame file not found on server.' }, { status: 404 });
   }
 
-  // REQUIREMENT 2: First frame is ALWAYS FREE
+  // TEST 2 REQUIREMENT: First frame is ALWAYS FREE
   if (frameNum === 1) {
     const fileBuffer = fs.readFileSync(framePath);
     return new NextResponse(fileBuffer, {
@@ -50,7 +46,7 @@ export async function GET(
     });
   }
 
-  // For Frames > 1: Check entitlement & x402 payment header
+  // For Frames > 1: Check wallet entitlement & x402 payment header
   const token =
     req.cookies.get('bioscope_session')?.value ||
     req.headers.get('authorization')?.replace('Bearer ', '');
@@ -79,7 +75,6 @@ export async function GET(
   const xPaymentHeader = req.headers.get('x-payment') || req.headers.get('x-402-payment');
   if (xPaymentHeader) {
     try {
-      // Payment proof format: "walletAddress:txHash" or "txHash"
       let payingWallet = authenticatedWallet;
       let txHash = xPaymentHeader;
 
@@ -110,36 +105,10 @@ export async function GET(
     }
   }
 
-  // 3. Unentitled & no valid payment -> Return HTTP 402 Payment Required!
-  const x402Spec = {
-    scheme: 'exact',
-    network: 'base-sepolia',
-    chainId: 84532,
-    maxAmount: '100000',
-    priceUsdc: reel.priceUsdc,
-    priceEth: reel.priceEth,
-    asset: 'USDC',
-    payTo: PAYMENT_RECEIVER,
+  // TEST 1 REQUIREMENT: Unentitled & no valid payment -> Return genuine x402 HTTP 402 Payment Required!
+  return createX402PaymentRequiredResponse({
     reelId,
-    frameRequested: frameNum,
-    description: `Unlock access to ${reel.title} (${reel.year})`
-  };
-
-  return NextResponse.json(
-    {
-      error: 'Payment Required',
-      status: 402,
-      message: `Reel '${reel.title}' requires an x402 testnet payment to view frame ${frameNum}.`,
-      reelId,
-      frameNumber: frameNum,
-      x402: x402Spec
-    },
-    {
-      status: 402,
-      headers: {
-        'X-Payment-Required': `x402 scheme=evm network=base-sepolia chainId=84532 amount=${reel.priceUsdc} payTo=${PAYMENT_RECEIVER} reelId=${reelId}`,
-        'WWW-Authenticate': 'X402 realm="Bioscope Gated Reel Frame"'
-      }
-    }
-  );
+    frameNumber: frameNum,
+    priceUsdc: reel.priceUsdc
+  });
 }

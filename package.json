@@ -1,5 +1,5 @@
 {
-  "name": "dev3",
+  "name": "bioscope-x402-paywall",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,13 +11,16 @@
     "test": "npx tsx scripts/test.ts && npx tsx scripts/test-http.ts"
   },
   "dependencies": {
+    "@x402/core": "^2.27.0",
+    "@x402/next": "^2.27.0",
     "better-sqlite3": "^13.0.3",
     "jose": "^6.2.12",
     "next": "16.3.6",
     "pngjs": "^7.0.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "viem": "^2.56.9"
+    "viem": "^2.56.9",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
